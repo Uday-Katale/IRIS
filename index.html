@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VALYRIAN AMR Control Center</title>
+<style>
+:root{--bg:#f2f5f9;--p:#ffffff;--p2:#eef2f7;--bd:#d7e0ea;--cy:#0891b2;--bl:#2563eb;--gr:#16a34a;--am:#b45309;--rd:#dc2626;--tx:#152238;--sb:#5b6b81;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html[data-theme="dark"]{--bg:#070b12;--p:#0e1622;--p2:#132033;--bd:#1f3048;--cy:#22d3ee;--bl:#3b82f6;--gr:#22c55e;--am:#f59e0b;--rd:#ef4444;--tx:#e6edf5;--sb:#7d92ac}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,Arial,sans-serif;font-size:12px}
+.app{display:grid;grid-template-columns:168px 1fr;grid-template-rows:50px minmax(0,1fr);height:100%}
+.side{grid-row:1/3;background:var(--p);border-right:1px solid var(--bd);padding:14px 10px;display:flex;flex-direction:column}
+.brand{font-weight:800;letter-spacing:2px;color:var(--cy);font-size:17px}.brand small{display:block;color:var(--sb);font-size:9px;letter-spacing:1px;font-weight:500;margin-top:2px}
+.nav{margin-top:22px}.nav div{padding:8px 10px;border-radius:5px;color:var(--sb);margin-bottom:2px;cursor:pointer}.nav div.on{background:rgba(8,145,178,.1);color:var(--cy);border-left:3px solid var(--cy);font-weight:600}
+.hdr{background:var(--p);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:16px;padding:0 14px}
+.hdr b{letter-spacing:1px}.sp{flex:1}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gr);box-shadow:0 0 6px var(--gr);margin-right:5px}
+.sim{background:rgba(180,83,9,.12);border:1px solid var(--am);color:var(--am);padding:3px 9px;border-radius:4px;font-size:10px;letter-spacing:1px;font-weight:700}
+.page{display:none;min-height:0}.page.on{display:block;overflow:auto;padding:10px}
+#page-nav.on{display:grid;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr) 190px;gap:8px;padding:8px;min-height:0;overflow:hidden}
+.pn{background:var(--p);border:1px solid var(--bd);border-radius:8px;padding:10px;min-height:0;min-width:0;display:flex;flex-direction:column}
+.pn h3{margin:0 0 6px;font-size:10px;letter-spacing:1.4px;color:var(--sb);display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.mapbox{position:relative;padding:0;overflow:hidden}#cv{width:100%;height:100%;display:block;flex:1;min-height:0}
+.banner{position:absolute;top:10px;left:50%;transform:translateX(-50%);padding:6px 16px;border-radius:6px;background:var(--p);opacity:.96;border:1px solid var(--cy);color:var(--cy);font-weight:700;letter-spacing:1.2px;font-size:12px;white-space:nowrap}
+.banner.warn{border-color:var(--am);color:var(--am)}.banner.bad{border-color:var(--rd);color:var(--rd);animation:pl 1s infinite}.banner.ok{border-color:var(--gr);color:var(--gr)}
+@keyframes pl{50%{opacity:.5}}
+.tl{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:4px}.tr{position:absolute;top:10px;right:10px;display:flex;gap:4px}
+.tl button,.tr button{background:var(--p);opacity:.95;border:1px solid var(--bd);color:var(--sb);border-radius:4px;padding:4px 8px;font-size:10px;cursor:pointer}
+.tl button.on{color:var(--cy);border-color:var(--cy)}.tr button:hover{border-color:var(--cy);color:var(--tx)}
+.leg{position:absolute;bottom:8px;left:10px;background:var(--p);opacity:.95;border:1px solid var(--bd);border-radius:6px;padding:6px 9px;font-size:10px;color:var(--sb);display:flex;gap:12px}
+.leg i{display:inline-block;width:12px;height:0;border-top:3px solid;vertical-align:middle;margin-right:4px}
+.pipe{position:absolute;bottom:8px;right:10px;display:flex;gap:4px;align-items:center;font-size:9px;color:var(--sb)}
+.pipe span{background:var(--p);opacity:.95;border:1px solid var(--bd);padding:3px 6px;border-radius:4px}
+.right{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0}
+.r{display:flex;justify-content:space-between;padding:2px 0;color:var(--sb)}.r b{color:var(--tx);font-weight:600}
+.bd{padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700}.g{background:rgba(22,163,74,.13);color:var(--gr)}.a{background:rgba(180,83,9,.13);color:var(--am)}.rd{background:rgba(220,38,38,.13);color:var(--rd)}.b{background:rgba(37,99,235,.13);color:var(--bl)}
+.bar{height:5px;background:var(--p2);border-radius:3px;overflow:hidden;margin:3px 0}.bar div{height:100%;background:var(--gr);transition:width .3s}
+.st{display:flex;gap:8px;padding:2.5px 0;color:var(--sb)}.st i{width:14px;height:14px;border-radius:50%;border:1px solid var(--bd);display:grid;place-items:center;font-style:normal;font-size:9px;flex:none}
+.st.on{color:var(--cy)}.st.on i{border-color:var(--cy)}.st.dn{color:var(--gr)}.st.dn i{border-color:var(--gr);background:rgba(22,163,74,.13)}
+.bottom{grid-column:1/3;display:grid;grid-template-columns:1.1fr .8fr 1.3fr 1.2fr;gap:8px;min-height:0}
+.log{flex:1;overflow-y:auto;font:11px Consolas,monospace;color:var(--sb)}.log div{padding:2px 0;border-bottom:1px solid var(--bd)}.log time{color:var(--cy);margin-right:6px}
+button.c{background:var(--p2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:5px;font-size:10px;cursor:pointer;font-weight:600}
+button.c:hover{border-color:var(--cy)}button.c.on{border-color:var(--cy);color:var(--cy)}button.c.stop{color:var(--rd);border-color:var(--rd);background:rgba(220,38,38,.08)}
+.row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;align-items:center}select{background:var(--p2);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:3px;font-size:11px}
+#toasts{position:fixed;bottom:16px;right:16px;display:flex;flex-direction:column;gap:6px;z-index:9}#toasts div{background:var(--p);border:1px solid var(--am);color:var(--am);padding:8px 12px;border-radius:6px;font-weight:600}
+.grid{display:grid;gap:10px}.g3{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.g2{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{background:var(--p);border:1px solid var(--bd);border-radius:8px;padding:12px}.card.hi{border-color:var(--cy);box-shadow:0 0 0 1px var(--cy) inset}
+.card h4{margin:0 0 6px;font-size:13px}.card button{margin-top:8px;width:100%}
+h2{font-size:16px;margin:2px 0 12px}h3.pt{font-size:12px;letter-spacing:1px;color:var(--sb);margin:18px 0 8px}
+.mini{color:var(--sb);font-size:10px}
+@media(max-width:1000px){html,body{height:auto}.app{display:block;height:auto}.side{display:none}#page-nav.on{display:block}.pn,.right{margin-bottom:8px}.mapbox{height:60vh}.bottom{display:block}}
+</style></head><body>
+<div class="app">
+<div class="side"><div class="brand">VALYRIAN<small>MODULAR AMR PLATFORM</small></div>
+<div class="nav">
+<div class="on" data-p="nav">Navigation</div><div data-p="task">Task</div><div data-p="status">Robot Status</div>
+<div data-p="module">Module</div><div data-p="analytics">Analytics</div><div data-p="settings">Settings</div></div>
+<div style="margin-top:auto;color:var(--sb);font-size:10px">Prototype · ROS 2 not connected</div></div>
+<div class="hdr"><b style="color:var(--cy)">VALYRIAN</b><b>AMR-01</b><span><i class="dot"></i>ONLINE</span><span style="color:var(--sb)">MODE <b id="hMode" style="color:var(--tx)">AUTONOMOUS</b></span><div class="sp"></div><span class="sim">SIMULATION · SIMULATED DATA</span></div>
+
+<div id="page-nav" class="page on">
+<div class="pn mapbox"><canvas id="cv"></canvas><div class="banner" id="banner">IDLE — READY</div>
+<div class="tl"><button class="on" data-l="lidar">LiDAR</button><button class="on" data-l="planned">Planned</button><button class="on" data-l="trail">Travelled</button><button class="on" data-l="obst">Obstacles</button></div>
+<div class="tr"><button onclick="V.z=Math.min(4,V.z*1.25)">＋</button><button onclick="V.z=Math.max(.6,V.z/1.25)">－</button><button onclick="V.follow=!V.follow">Center on AMR</button><button onclick="V.z=1;V.follow=false">Reset view</button></div>
+<div class="leg"><span><i style="border-color:#9fb0c4"></i>SCANNED MAP</span><span><i style="border-color:var(--bl);border-top-style:dashed"></i>PLANNED</span><span><i style="border-color:var(--cy)"></i>TRAVELLED</span><span><i style="border-color:var(--rd)"></i>OBSTACLE</span><span><i style="border-color:var(--gr)"></i>DESTINATION</span></div>
+<div class="pipe"><span>SIMULATED LiDAR /scan</span>→<span id="pSlam">SLAM map+loc</span>→<span id="pNav">NAV2 plan+ctrl</span>→<span>Controller</span></div></div>
+<div class="right">
+<div class="pn"><h3>CURRENT TASK · <span id="tId">T-101</span> <span class="bd b" id="tStat">IDLE</span></h3><div id="steps"></div><div class="r">Progress <b id="tProg">0%</b></div><div class="bar"><div id="tBar" style="background:var(--cy);width:0"></div></div></div>
+<div class="pn"><h3>ROBOTIC ARM · SIMULATED <span class="bd b" id="armSt">N/A</span></h3><canvas id="arm" width="300" height="115" style="width:100%;height:115px"></canvas>
+<div class="r">Joints <b id="armJ">--</b></div><div class="r">Gripper <b id="armG">--</b></div><div class="r">Forward range (LiDAR) <b id="fr">--</b></div></div>
+<div class="pn"><h3>ROBOT STATUS</h3><div class="r">Status <b id="rSt">IDLE</b></div><div class="r">Battery <b id="rBat"></b></div><div class="bar"><div id="bBar"></div></div>
+<div class="r">Speed <b id="rV"></b></div><div class="r">Payload <b id="rPl"></b></div><div class="r">Position <b id="rPos"></b></div></div>
+<div class="pn"><h3>CURRENT MODULE <select id="modSel"><option>Cargo Module</option><option>Lift Module</option><option>Conveyor Module</option><option>Inspection Module</option><option>Robotic Arm Module</option></select></h3>
+<div class="r">Module <b id="mN">📦 Cargo Module</b></div><div class="r">Function <b id="mF">Material Transport</b></div><div class="r">Lock · Power · Data <span class="bd g" id="mC">✓ ✓ ✓ READY</span></div></div>
+</div>
+<div class="bottom">
+<div class="pn"><h3>SENSORS (SIMULATED)</h3><div class="r">LiDAR (mid-section) <span class="bd g">ACTIVE</span></div><div class="r">RGB Camera <span class="bd g">ACTIVE</span></div><div class="r">Ultrasonic / IR <span class="bd g">ACTIVE</span></div><div class="r">Wheel Encoders <span class="bd g">ACTIVE</span></div><div class="r">IMU <span class="bd g">ACTIVE</span></div><div class="r">SLAM <b id="slam"></b></div></div>
+<div class="pn"><h3>PATH INFO · NAV2 (SIM)</h3><div class="r">Total <b id="pT">0.0 m</b></div><div class="r">Travelled <b id="pD">0.0 m</b></div><div class="r">Remaining <b id="pR">0.0 m</b></div><div class="r">Map coverage <b id="cov">0%</b></div><div class="r">Nav state <b id="nvs">IDLE</b></div></div>
+<div class="pn"><h3>NAVIGATION LOG</h3><div class="log" id="log"></div></div>
+<div class="pn"><h3>SIMULATION <span id="clk" style="color:var(--sb)"></span></h3>
+<div class="row"><button class="c" id="bStart">▶ START</button><button class="c" id="bPause">⏸ PAUSE</button><button class="c" id="bReset">⟲ RESET</button></div>
+<div class="row" id="spd"><button class="c" data-s=".5">.5x</button><button class="c on" data-s="1">1x</button><button class="c" data-s="2">2x</button><button class="c" data-s="5">5x</button><label style="color:var(--sb)"><input type="checkbox" id="inj" checked> inject obstacle</label></div>
+<div class="row"><button class="c" id="bCancel">CANCEL TASK</button><button class="c" id="bChg">RETURN TO CHARGER</button></div>
+<div class="row"><button class="c stop" id="bEs">⚠ SIMULATED E-STOP</button><button class="c" id="bEr" style="display:none">RESET E-STOP</button></div></div>
+</div></div>
+
+<div id="page-task" class="page"><h2>Task Management</h2><p class="mini">Each module runs a different mission profile. Selecting a card sets it as AMR-01's current task (requires idle).</p>
+<div class="grid g2" id="taskCards"></div>
+<h3 class="pt">TASK HISTORY (SIMULATED)</h3>
+<div class="grid g3" id="taskHist"></div></div>
+
+<div id="page-status" class="page"><h2>Robot Status</h2><p class="mini">Detailed telemetry — SIMULATED DATA.</p>
+<div class="grid g3">
+<div class="card"><h4>Power</h4><div class="r">Battery <b id="rs-batt"></b></div><div class="r">Charging <b id="rs-chg"></b></div><div class="r">Payload <b id="rs-pl"></b></div></div>
+<div class="card"><h4>Motion</h4><div class="r">Motors <b id="rs-mot"></b></div><div class="r">Speed <b id="rs-v"></b></div><div class="r">Heading <b id="rs-h"></b></div><div class="r">Position <b id="rs-pos"></b></div></div>
+<div class="card"><h4>Autonomy Stack</h4><div class="r">Navigation <b id="rs-nav"></b></div><div class="r">Localization <b id="rs-loc"></b></div><div class="r">SLAM <b id="rs-slam"></b></div><div class="r">Obstacle detection <b id="rs-obs"></b></div></div>
+<div class="card"><h4>Sensors</h4><div class="r">LiDAR <b>ACTIVE</b></div><div class="r">Camera <b>ACTIVE</b></div><div class="r">IMU <b>ACTIVE</b></div><div class="r">Encoders <b>ACTIVE</b></div></div>
+<div class="card"><h4>Module</h4><div class="r">Attached <b id="rs-mod"></b></div><div class="r">Connection <b id="rs-conn"></b></div></div>
+<div class="card"><h4>System</h4><div class="r">Temperature <b id="rs-temp">38.4 °C</b></div><div class="r">Connection <b>ONLINE</b></div><div class="r">Mode <b id="rs-mode"></b></div></div>
+</div></div>
+
+<div id="page-module" class="page"><h2>Modules</h2><p class="mini">One base, interchangeable modules. Click a card to attach it (requires idle).</p>
+<div class="grid g2" id="modCards"></div></div>
+
+<div id="page-analytics" class="page"><h2>Analytics <span class="sim" style="position:static">SIMULATED DATA</span></h2>
+<div class="grid g3">
+<div class="card"><h4>47</h4><div class="mini">Tasks completed</div></div>
+<div class="card"><h4>12.8 km</h4><div class="mini">Distance travelled</div></div>
+<div class="card"><h4>7h 24m</h4><div class="mini">Operating time</div></div>
+<div class="card"><h4>186 kg</h4><div class="mini">Material moved</div></div>
+<div class="card"><h4>9m 26s</h4><div class="mini">Average task time</div></div>
+<div class="card"><h4>6</h4><div class="mini">Obstacle events handled</div></div>
+</div>
+<h3 class="pt">TASKS BY MODULE (SIMULATED)</h3>
+<div id="anBars"></div></div>
+
+<div id="page-settings" class="page"><h2>Settings</h2>
+<div class="grid g2">
+<div class="card"><h4>Appearance</h4><label><input type="checkbox" id="themeToggle"> Dark theme</label></div>
+<div class="card"><h4>Simulation speed</h4><select id="spdSel"><option value=".5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="5">5x</option></select></div>
+<div class="card"><h4>Obstacle injection</h4><label><input type="checkbox" id="inj2" checked> Spawn an obstacle mid-route</label></div>
+<div class="card"><h4>Reset</h4><button class="c" id="bResetAll">Reset all simulation data</button></div>
+</div></div>
+</div>
+<div id="toasts"></div>
+<script>
+const $=id=>document.getElementById(id),D=Math.PI/180,W=30,H=20;
+const CFG={vmax:.8,turn:110,accel:.8,range:7,fov:270,rays:108,cell:.25,
+dur:{ASSIGNED:1.2,SCAN:3,PLAN:1,LOAD:2.2,UNLOAD:2,REPLAN:2,OBST_STOP:.8,ALIGN:1.4,REACH:1.4,GRASP:1,LIFT:1.2,RETRACT:1.4,ALIGN2:1.2,REACH2:1.4,RELEASE:1,RETRACT2:1.4,DONE:1}};
+const RECTS=[[0,0,30,.2],[0,19.8,30,.2],[0,0,.2,20],[29.8,0,.2,20],[1,10.5,2,7.5],[8,10.5,2,7.5],[14,2,2,4.5],[20,10.5,2,7.5],[25,2,4,5],[25,12,4,5],[12,15,3,2]];
+const LABELS=[['STORAGE A',2,10.1],['STORAGE B',9,10.1],['ASSEMBLY',13.5,14.6],['CNC STATION',27,7.7],['INSPECTION',27,11.6],['CHARGING',2.6,3.4]];
+const NODES={C:[2,2],N1:[4.6,2],J:[4.6,8.5],A2:[2,8.5],A:[2,10.3],B2:[9,8.5],B:[9,10.3],AS2:[13.5,8.5],AS:[13.5,14.8],K:[22,8.5],D1:[22,4.5],X:[23.6,4.5],ID:[22,13],I:[23.6,13.5]};
+const EDGES=[['C','N1'],['N1','J'],['J','A2'],['A2','A'],['A2','B2'],['B2','B'],['B2','AS2'],['AS2','AS'],['AS2','K'],['K','D1'],['D1','X'],['K','ID'],['ID','I']];
+const STA={A:'Storage A',B:'Storage B',AS:'Assembly',X:'CNC Station',I:'Inspection',C:'Charging Station'};
+const MODS={'Cargo Module':'📦','Lift Module':'⬆','Conveyor Module':'➡','Inspection Module':'🔍','Robotic Arm Module':'🤖'};
+const MISSIONS={
+'Cargo Module':{id:'T-101',type:'Material Transport',pick:'A',drop:'X',payload:3.2,pickLbl:'Loading cargo tray',dropLbl:'Unloading cargo tray'},
+'Lift Module':{id:'T-102',type:'Pick & Stack',pick:'B',drop:'AS',payload:4.0,pickLbl:'Lifting pallet',dropLbl:'Stacking pallet'},
+'Conveyor Module':{id:'T-103',type:'Conveyor Transfer',pick:'I',drop:'A',payload:2.5,pickLbl:'Loading conveyor belt',dropLbl:'Unloading onto rack'},
+'Inspection Module':{id:'T-105',type:'Quality Check',pick:'AS',drop:'I',payload:1.0,pickLbl:'Scanning component',dropLbl:'Logging inspection result'},
+'Robotic Arm Module':{id:'T-104',type:'Pick & Place',pick:'A',drop:'X',payload:3.2,pickLbl:'Arm pick sequence',dropLbl:'Arm place sequence',arm:true}};
+const POSE={STOW:[95,-170,0],REACH:[8,-8,1],GRASP:[8,-8,.3],LIFT:[45,-25,.3],CARRY:[95,-170,.3],PLACE:[8,-8,.3],OPEN:[8,-8,1]};
+const ARMP={ALIGN:'STOW',REACH:'REACH',GRASP:'GRASP',LIFT:'LIFT',RETRACT:'CARRY',ALIGN2:'CARRY',REACH2:'PLACE',RELEASE:'OPEN',RETRACT2:'STOW'};
+let S,V={z:1,follow:false,lidar:1,planned:1,trail:1,obst:1},OBST_ENABLED=true,THEME;
+const grid=new Uint8Array((W/CFG.cell)*(H/CFG.cell)),GW=W/CFG.cell,GH=H/CFG.cell;
+const off=document.createElement('canvas');off.width=GW;off.height=GH;const oc=off.getContext('2d');
+let freeTruth=0;for(let i=0;i<grid.length;i++){const x=(i%GW+.5)*CFG.cell,y=(Math.floor(i/GW)+.5)*CFG.cell;if(!RECTS.some(r=>x>=r[0]&&x<=r[0]+r[2]&&y>=r[1]&&y<=r[1]+r[3]))freeTruth++}
+function themeColors(){const d=document.documentElement.dataset.theme==='dark';return d?{bgc:'#060c14',grid:'rgba(120,150,190,.06)',rack:'rgba(120,150,190,.16)',rackEdge:'#3f5165',scanFree:'#10263c',scanOcc:'#b4c3d6',txt:'#7d92ac',planned:'#3b82f6',trail:'#22d3ee',obstF:'rgba(239,68,68,.35)',obst:'#ef4444',goal:'#22c55e'}:{bgc:'#e9eef4',grid:'rgba(30,50,80,.05)',rack:'rgba(30,50,80,.34)',rackEdge:'#2a3f5c',scanFree:'rgba(30,50,80,.20)',scanOcc:'#475569',txt:'#5b6b81',planned:'#2563eb',trail:'#0891b2',obstF:'rgba(220,38,38,.20)',obst:'#dc2626',goal:'#16a34a'}}
+function rebuildOff(){oc.clearRect(0,0,GW,GH);for(let i=0;i<grid.length;i++){if(grid[i]==1){oc.fillStyle=THEME.scanFree;oc.fillRect(i%GW,(i/GW)|0,1,1)}else if(grid[i]==2){oc.fillStyle=THEME.scanOcc;oc.fillRect(i%GW,(i/GW)|0,1,1)}}}
+function curModName(){return $('modSel').value}
+function curMission(){return S.mission||MISSIONS[curModName()]}
+function init(){S={x:2,y:2,h:0,v:0,batt:87,payload:0,phase:'IDLE',t:0,path:[],pi:1,legLen:1,legDone:0,trail:[{x:2,y:2}],obstacles:[],hitObst:null,replannedThisLeg:false,obstThisLeg:false,stopping:false,paused:false,estop:false,ts:S?S.ts:1,arm:[95,-170,0],armT:'STOW',box:null,prog:0,ranges:[],ox:2,oy:2,fr:0,nFree:0,ck:0,mission:null,navGoal:null,navAfter:null};
+grid.fill(0);oc.clearRect(0,0,GW,GH);$('log').innerHTML='';log('AMR-01 ready — simulation mode, map empty')}
+function log(m){const d=document.createElement('div');d.innerHTML=`<time>${new Date().toLocaleTimeString('en-GB')}</time>${m}`;$('log').prepend(d)}
+function toast(m){const d=document.createElement('div');d.textContent=m;$('toasts').append(d);setTimeout(()=>d.remove(),3500)}
+function rayRect(ox,oy,dx,dy,r){let t0=0,t1=1e9;for(const[o,d,lo,hi]of[[ox,dx,r[0],r[0]+r[2]],[oy,dy,r[1],r[1]+r[3]]]){if(Math.abs(d)<1e-9){if(o<lo||o>hi)return Infinity}else{let a=(lo-o)/d,b=(hi-o)/d;if(a>b)[a,b]=[b,a];t0=Math.max(t0,a);t1=Math.min(t1,b);if(t0>t1)return Infinity}}return t0}
+function mark(x,y,v){const cxg=Math.floor(x/CFG.cell),cyg=Math.floor(y/CFG.cell);if(cxg<0||cyg<0||cxg>=GW||cyg>=GH)return;const i=cyg*GW+cxg;
+if(v==1&&grid[i]==0){grid[i]=1;S.nFree++;oc.fillStyle=THEME.scanFree;oc.fillRect(cxg,cyg,1,1)}else if(v==2&&grid[i]!=2){if(grid[i]==1)S.nFree--;grid[i]=2;oc.fillStyle=THEME.scanOcc;oc.fillRect(cxg,cyg,1,1)}}
+function scan(){const ox=S.x+Math.cos(S.h*D)*.25,oy=S.y+Math.sin(S.h*D)*.25;S.ox=ox;S.oy=oy;const rs=RECTS.concat(S.obstacles);S.ranges=[];let fr=CFG.range,hit5=false,hitObst=null;
+for(let i=0;i<CFG.rays;i++){const ang=S.h-CFG.fov/2+i*CFG.fov/(CFG.rays-1),a=ang*D,dx=Math.cos(a),dy=Math.sin(a);let best=CFG.range,hoR=null;
+for(const r of rs){const t=rayRect(ox,oy,dx,dy,r);if(t<best){best=t;hoR=S.obstacles.includes(r)?r:null}}
+const hit=best<CFG.range;for(let d=.3;d<best;d+=.2)mark(ox+dx*d,oy+dy*d,1);if(hit)mark(ox+dx*best,oy+dy*best,2);
+S.ranges.push([dx,dy,best,hit,!!hoR]);const off_=ang-S.h;if(Math.abs(off_)<4&&best<fr)fr=best;if(hoR&&best<5.2&&Math.abs(off_)<20){hit5=true;hitObst=hoR}}
+S.fr=fr;S.hitObst=hitObst;return hit5}
+function route(toKey){let n0=null,bd=1e9;for(const k in NODES){const d=Math.hypot(NODES[k][0]-S.x,NODES[k][1]-S.y);if(d<bd){bd=d;n0=k}}
+const q=[[n0]],seen={[n0]:1};while(q.length){const p=q.shift(),l=p[p.length-1];if(l==toKey){const pts=[{x:S.x,y:S.y}];p.forEach(k=>pts.push({x:NODES[k][0],y:NODES[k][1]}));return pts.filter((a,i)=>i==0||Math.hypot(a.x-pts[i-1].x,a.y-pts[i-1].y)>.05)}
+for(const[a,b]of EDGES){const nx=a==l?b:b==l?a:null;if(nx&&!seen[nx]){seen[nx]=1;q.push([...p,nx])}}}return[{x:S.x,y:S.y}]}
+function plen(pts){let d=0;for(let i=1;i<pts.length;i++)d+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);return d}
+function beginNav(goal,after){S.navGoal=goal;S.navAfter=after;S.stopping=false;S.path=route(goal);S.pi=1;S.legLen=Math.max(.1,plen(S.path));S.legDone=0;S.replannedThisLeg=false;S.obstThisLeg=false;S.phase='NAV';S.t=0;log('Path generated — navigating to '+(STA[goal]||goal))}
+function turnTo(deg,dt){let d=((deg-S.h+540)%360+360)%360-180;const s=CFG.turn*dt;S.h=(S.h+Math.max(-s,Math.min(s,d))+360)%360;return Math.abs(d)<2}
+function drive(dt){const p=S.path[S.pi];if(!p)return true;const dx=p.x-S.x,dy=p.y-S.y,dist=Math.hypot(dx,dy),want=Math.atan2(dy,dx)/D;
+const ok=turnTo(want,dt)||Math.abs(((want-S.h+540)%360+360)%360-180)<12;const last=S.pi==S.path.length-1;
+const tg=S.stopping?0:(ok?CFG.vmax*(last&&dist<.8?.4:1):0);S.v+=Math.max(-CFG.accel*1.6*dt,Math.min(CFG.accel*dt,tg-S.v));
+const m=Math.min(dist,S.v*dt);if(dist>1e-6){S.x+=dx/dist*m;S.y+=dy/dist*m}S.legDone+=m;const t=S.trail[S.trail.length-1];if(Math.hypot(S.x-t.x,S.y-t.y)>.12)S.trail.push({x:S.x,y:S.y});
+if(dist<.06){S.pi++;if(S.pi>=S.path.length){S.v=0;return true}}return false}
+function spawnObstacle(){const p1=S.path[S.pi]||{x:S.x,y:S.y};const dx=p1.x-S.x,dy=p1.y-S.y,len=Math.hypot(dx,dy)||1;const ex=S.x+dx/len*1.7,ey=S.y+dy/len*1.7;S.obstacles.push([ex-.6,ey-.6,1.2,1.2]);S.obstThisLeg=true;toast('⚠ Obstacle detected by simulated LiDAR');log('Unmapped object on path (simulated)')}
+function insertDetour(){const p0={x:S.x,y:S.y},remainAll=S.path.slice(S.pi),o=S.hitObst||S.obstacles[S.obstacles.length-1],ocx=o[0]+o[2]/2,ocy=o[1]+o[3]/2;
+const tgt=remainAll[0]||p0;let dx=tgt.x-p0.x,dy=tgt.y-p0.y;const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
+const margin=Math.max(o[2],o[3])/2+1.4;
+const insideWall=p=>RECTS.some(r=>p.x>=r[0]-.15&&p.x<=r[0]+r[2]+.15&&p.y>=r[1]-.15&&p.y<=r[1]+r[3]+.15);
+const bad=w=>{const q=[p0].concat(w);for(let i=1;i<q.length;i++){const a=q[i-1],b=q[i],n=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/.1);for(let k=0;k<=n;k++)if(insideWall({x:a.x+(b.x-a.x)*k/n,y:a.y+(b.y-a.y)*k/n}))return true}return false};
+let wp;
+if(Math.abs(dx)>=Math.abs(dy)){const aheadX=ocx+(dx>=0?1:-1)*margin;const side=s=>[{x:p0.x,y:ocy+s*margin},{x:aheadX,y:ocy+s*margin}];
+wp=side(1);if(bad(wp))wp=side(-1)}
+else{const aheadY=ocy+(dy>=0?1:-1)*margin;const side=s=>[{x:ocx+s*margin,y:p0.y},{x:ocx+s*margin,y:aheadY}];
+wp=side(1);if(bad(wp))wp=side(-1)}
+const hz=Math.abs(dx)>=Math.abs(dy),sg=hz?(dx>=0?1:-1):(dy>=0?1:-1),aheadV=(hz?ocx:ocy)+sg*margin;let ri=0;while(ri<remainAll.length-1){const q=remainAll[ri],lane=hz?Math.abs(q.y-ocy)<=margin*.9:Math.abs(q.x-ocx)<=margin*.9,before=((hz?q.x:q.y)-aheadV)*sg<0;if(lane&&before)ri++;else break}
+const remain=remainAll.slice(ri).filter(p=>Math.hypot(p.x-ocx,p.y-ocy)>margin*.9);
+S.path=[p0].concat(wp,remain.length?remain:remainAll.slice(-1));S.pi=1;S.legLen=Math.max(.1,plen(S.path));S.legDone=0}
+function navStep(dt){const dropLeg=S.navAfter=='ALIGN2'||S.navAfter=='UNLOAD';
+if(!S.obstacles.length&&OBST_ENABLED&&dropLeg){const a=S.path[S.pi-1],b=S.path[S.pi];
+if(a&&b){const segLen=Math.hypot(b.x-a.x,b.y-a.y);if(segLen>=4){const doneInSeg=Math.hypot(S.x-a.x,S.y-a.y),frac=doneInSeg/segLen;if(frac>.35&&frac<.65)spawnObstacle()}}}
+const arrived=drive(dt);
+if(S.hit&&!S.replannedThisLeg&&!arrived){S.stopping=true;setPhase('OBSTACLE');return}
+if(arrived){S.stopping=false;setPhase(S.navAfter)}}
+function setPhase(p){S.phase=p;S.t=0;const m=curMission();
+const msg={ASSIGNED:`Task ${m.id} assigned — ${m.type} (${curModName()})`,SCAN:'LiDAR sweep — building occupancy map',PLAN_PICK:`Planning route to ${STA[m.pick]}`,ALIGN:'Arrived '+STA[m.pick]+' — LiDAR aligning',REACH:'Arm reaching for item',GRASP:'Gripper closing',LIFT:'Lifting item',RETRACT:`Retracted — payload ${m.payload} kg secured`,LOAD:`${m.pickLbl} at ${STA[m.pick]}`,PLAN_DROP:`Planning route to ${STA[m.drop]}`,UNLOAD:`${m.dropLbl} at ${STA[m.drop]}`,ALIGN2:'Arrived '+STA[m.drop]+' — LiDAR aligning',REACH2:'Arm extending',RELEASE:'Releasing payload',RETRACT2:'Arm retracted',DONE:`Task ${m.id} completed`,OBSTACLE:'⚠ LiDAR: obstacle on path — stopping',REPLAN:'Path blocked — costmap updated, replanning',CHARGING:'Docked — charging started'};
+if(msg[p])log(msg[p]);if(ARMP[p])S.armT=ARMP[p];
+if(p=='PLAN_PICK')S.mission=m;
+if(p=='LOAD'||p=='GRASP'){}
+if(p=='PLAN_DROP'){S.payload=m.payload;S.box='held'}
+if(p=='UNLOAD'){}
+if(p=='DONE'){S.payload=0;S.box=null}
+}
+function step(dt){S.t+=dt;const p=S.phase,m=curMission();
+if(p=='ASSIGNED'&&S.t>=CFG.dur.ASSIGNED)setPhase('SCAN');
+else if(p=='SCAN'){S.h=(S.h+360/CFG.dur.SCAN*dt)%360;if(S.t>=CFG.dur.SCAN)setPhase('PLAN_PICK')}
+else if(p=='PLAN_PICK'&&S.t>=CFG.dur.PLAN)beginNav(m.pick,m.arm?'ALIGN':'LOAD');
+else if(p=='NAV')navStep(dt);
+else if(p=='OBSTACLE'){S.v=Math.max(0,S.v-3*dt);if(S.v<.02&&S.t>CFG.dur.OBST_STOP){S.v=0;setPhase('REPLAN')}}
+else if(p=='REPLAN'&&S.t>=CFG.dur.REPLAN){insertDetour();S.replannedThisLeg=true;S.stopping=false;S.phase='NAV';S.t=0;log('New path ready — navigation resumed')}
+else if(p=='LOAD'&&S.t>=CFG.dur.LOAD)setPhase('PLAN_DROP');
+else if(p=='ALIGN'&&S.t>=CFG.dur.ALIGN)setPhase('REACH');
+else if(p=='REACH'&&S.t>=CFG.dur.REACH)setPhase('GRASP');
+else if(p=='GRASP'&&S.t>=CFG.dur.GRASP){S.payload=m.payload;S.box='held';setPhase('LIFT')}
+else if(p=='LIFT'&&S.t>=CFG.dur.LIFT)setPhase('RETRACT');
+else if(p=='RETRACT'&&S.t>=CFG.dur.RETRACT)setPhase('PLAN_DROP');
+else if(p=='PLAN_DROP'&&S.t>=CFG.dur.PLAN)beginNav(m.drop,m.arm?'ALIGN2':'UNLOAD');
+else if(p=='UNLOAD'&&S.t>=CFG.dur.UNLOAD){S.payload=0;S.box='dropped';setPhase('DONE')}
+else if(p=='ALIGN2'&&S.t>=CFG.dur.ALIGN2)setPhase('REACH2');
+else if(p=='REACH2'&&S.t>=CFG.dur.REACH2)setPhase('RELEASE');
+else if(p=='RELEASE'&&S.t>=CFG.dur.RELEASE){S.payload=0;S.box='table';setPhase('RETRACT2')}
+else if(p=='RETRACT2'&&S.t>=CFG.dur.RETRACT2)setPhase('DONE');
+else if(p=='DONE'&&S.t>CFG.dur.DONE){S.phase='IDLE';S.path=[];S.mission=null}
+else if(p=='RETURN'){}
+else if(p=='CHARGING'){S.batt=Math.min(100,S.batt+2.5*dt);if(S.batt>=100){S.phase='IDLE';S.path=[];log('Charging complete')}}
+if(p!='IDLE'&&p!='CHARGING')S.batt=Math.max(1,S.batt-(.015+S.v*.05)*dt)}
+const cv=$('cv'),cx=cv.getContext('2d');
+function fit(){const d=devicePixelRatio||1;cv.width=cv.clientWidth*d;cv.height=cv.clientHeight*d}new ResizeObserver(fit).observe(cv);
+function poly(pts){cx.beginPath();pts.forEach((p,i)=>i?cx.lineTo(p.x,p.y):cx.moveTo(p.x,p.y));cx.stroke()}
+function draw(now){const d=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight,sc=Math.min(w/(W+1.5),h/(H+1.5))*V.z;let ox=(w-W*sc)/2,oy=(h-H*sc)/2;if(V.follow){ox=w/2-S.x*sc;oy=h/2-S.y*sc}
+cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);cx.setTransform(sc*d,0,0,sc*d,ox*d,oy*d);const px=1/sc;
+cx.fillStyle=THEME.bgc;cx.fillRect(0,0,W,H);cx.strokeStyle=THEME.grid;cx.lineWidth=px;for(let i=0;i<=W;i++){cx.beginPath();cx.moveTo(i,0);cx.lineTo(i,H);cx.stroke()}for(let j=0;j<=H;j++){cx.beginPath();cx.moveTo(0,j);cx.lineTo(W,j);cx.stroke()}
+cx.fillStyle=THEME.rack;cx.strokeStyle=THEME.rackEdge;cx.lineWidth=px;RECTS.forEach(r=>{cx.fillRect(...r);cx.strokeRect(...r)});
+cx.fillStyle='rgba(180,83,9,.08)';cx.fillRect(16,12,4,3);cx.strokeStyle='rgba(180,83,9,.5)';cx.setLineDash([6*px,4*px]);cx.strokeRect(16,12,4,3);cx.setLineDash([]);
+cx.imageSmoothingEnabled=false;cx.drawImage(off,0,0,W,H);
+cx.font=`${9*px}px sans-serif`;cx.textAlign='center';cx.fillStyle=THEME.txt;LABELS.forEach(l=>cx.fillText(l[0],l[1],l[2]));
+const goal=curMission().drop,gp=NODES[goal]||NODES.X;
+cx.strokeStyle=THEME.goal;cx.lineWidth=2*px;cx.beginPath();cx.arc(2,2,.5,0,7);cx.stroke();cx.beginPath();cx.arc(gp[0],gp[1],.4,0,7);cx.stroke();cx.fillStyle=THEME.goal;cx.fillText('GOAL',gp[0],gp[1]-.6);
+const pos={x:S.x,y:S.y};
+if(V.planned&&S.phase=='REPLAN'&&S.replannedThisLeg===false){}
+if(V.planned&&S.path.length>1){cx.strokeStyle=THEME.planned;cx.lineWidth=2.5*px;cx.setLineDash([8*px,6*px]);poly([pos].concat(S.path.slice(S.pi)));cx.setLineDash([])}
+if(V.trail&&S.trail.length>1){cx.strokeStyle=THEME.trail;cx.lineWidth=3*px;poly(S.trail)}
+if(V.obst&&S.obstacles.length){S.obstacles.forEach(o=>{cx.fillStyle=THEME.obstF;cx.fillRect(...o);cx.strokeStyle=THEME.obst;cx.lineWidth=2*px;cx.strokeRect(...o)});
+if((S.phase=='OBSTACLE'||S.phase=='REPLAN')&&S.hitObst){const o=S.hitObst,r=.9+.3*Math.sin(now/200);cx.globalAlpha=.5;cx.strokeStyle=THEME.obst;cx.beginPath();cx.arc(o[0]+o[2]/2,o[1]+o[3]/2,r+.4,0,7);cx.stroke();cx.globalAlpha=1}}
+if(V.lidar&&S.ranges.length&&S.phase!='IDLE'){cx.strokeStyle=THEME.trail.replace('#','#')+'';cx.globalAlpha=.15;cx.lineWidth=px;cx.beginPath();S.ranges.forEach(r=>{cx.moveTo(S.ox,S.oy);cx.lineTo(S.ox+r[0]*r[2],S.oy+r[1]*r[2])});cx.stroke();cx.globalAlpha=1;
+S.ranges.forEach(r=>{if(r[3]){cx.fillStyle=r[4]?THEME.obst:THEME.trail;cx.fillRect(S.ox+r[0]*r[2]-1.2*px,S.oy+r[1]*r[2]-1.2*px,2.4*px,2.4*px)}});
+const k=S.ranges[Math.floor(now/14)%S.ranges.length];cx.strokeStyle=THEME.trail;cx.globalAlpha=.7;cx.lineWidth=1.5*px;cx.beginPath();cx.moveTo(S.ox,S.oy);cx.lineTo(S.ox+k[0]*k[2],S.oy+k[1]*k[2]);cx.stroke();cx.globalAlpha=1}
+cx.save();cx.translate(S.x,S.y);cx.rotate(S.h*D);cx.lineWidth=1.5*px;
+cx.fillStyle='#111a26';cx.strokeStyle='#4b5b70';[-.37,.27].forEach(y=>{cx.fillRect(-.14,y,.28,.1);cx.strokeRect(-.14,y,.28,.1)});
+cx.fillStyle='#13263b';cx.strokeStyle=THEME.trail;cx.beginPath();cx.roundRect(-.45,-.3,.9,.6,.1);cx.fill();cx.stroke();
+cx.fillStyle='#1d3550';cx.strokeStyle=THEME.planned;cx.fillRect(-.4,-.24,.5,.48);cx.strokeRect(-.4,-.24,.5,.48);
+if(curModName()=='Robotic Arm Module'){cx.fillStyle=THEME.trail;cx.beginPath();cx.arc(-.18,0,.09,0,7);cx.fill()}
+cx.fillStyle='#050a10';cx.strokeStyle=THEME.trail;cx.beginPath();cx.arc(.25,0,.09,0,7);cx.fill();cx.stroke();
+cx.fillStyle=THEME.trail;cx.beginPath();cx.moveTo(.58,0);cx.lineTo(.46,-.09);cx.lineTo(.46,.09);cx.fill();
+cx.fillStyle=S.estop?THEME.obst:S.phase=='OBSTACLE'?'#f59e0b':THEME.goal;cx.beginPath();cx.arc(.38,-.22,.04,0,7);cx.fill();cx.restore();
+cx.fillStyle=THEME.txt;cx.font=`bold ${9*px}px sans-serif`;cx.fillText('AMR-01',S.x,S.y-.62)}
+const ac=$('arm').getContext('2d');
+function drawArm(){const arm=curModName()=='Robotic Arm Module';const[s,e,g]=S.arm,c=ac;c.clearRect(0,0,300,115);
+if(!arm){c.fillStyle=getComputedStyle(document.body).getPropertyValue('--sb');c.font='11px sans-serif';c.textAlign='center';c.fillText('Robotic Arm Module not attached',150,60);return}
+c.strokeStyle=getComputedStyle(document.body).getPropertyValue('--bd');c.beginPath();c.moveTo(0,100);c.lineTo(300,100);c.stroke();
+c.fillStyle=getComputedStyle(document.body).getPropertyValue('--p2');c.fillRect(10,92,60,8);c.strokeStyle='#4b5b70';c.strokeRect(10,92,60,8);c.fillStyle='#8aa0bb';c.fillRect(150,98,45,6);
+const bx=40,by=92,x1=bx+55*Math.cos(s*D),y1=by-55*Math.sin(s*D),a2=(s+e)*D,x2=x1+45*Math.cos(a2),y2=y1-45*Math.sin(a2);
+c.lineCap='round';c.strokeStyle=THEME.trail;c.lineWidth=6;c.beginPath();c.moveTo(bx,by);c.lineTo(x1,y1);c.stroke();c.strokeStyle=THEME.planned;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+c.fillStyle=THEME.txt;[[bx,by],[x1,y1]].forEach(p=>{c.beginPath();c.arc(p[0],p[1],4,0,7);c.fill()});
+c.strokeStyle=THEME.txt;c.lineWidth=2.5;const sp=3+g*7;[-1,1].forEach(k=>{c.beginPath();c.moveTo(x2,y2+k*sp);c.lineTo(x2+8,y2+k*sp);c.stroke()});
+c.fillStyle='#c98a3a';const bp=S.box=='held'?[x2+3,y2]:S.box=='table'||S.box=='dropped'?[172,92]:[139,93];if(S.box)c.fillRect(bp[0]-6+(S.box=='held'?4:0),bp[1]-6,12,12);
+c.fillStyle=THEME.txt;c.font='9px sans-serif';c.fillText(S.box=='table'||S.box=='dropped'?'DROP TABLE':'RACK',150,112)}
+function ui(){const p=S.phase,m=curMission(),arm=curModName()=='Robotic Arm Module';
+const lbl={IDLE:'IDLE — READY',ASSIGNED:'TASK ASSIGNED',SCAN:'LiDAR MAPPING SWEEP',PLAN_PICK:'PLANNING → '+STA[m.pick],OBSTACLE:'OBSTACLE DETECTED — STOPPING',REPLAN:'REPLANNING PATH…',ALIGN:'ARM: ALIGNING',REACH:'ARM: REACHING',GRASP:'ARM: GRASPING',LIFT:'ARM: LIFTING',RETRACT:'ARM: RETRACTING',LOAD:m.pickLbl.toUpperCase(),PLAN_DROP:'PLANNING → '+STA[m.drop],UNLOAD:m.dropLbl.toUpperCase(),ALIGN2:'ARM: ALIGNING AT '+STA[m.drop],REACH2:'ARM: PLACING',RELEASE:'ARM: RELEASING',RETRACT2:'ARM: RETRACTING',DONE:'TASK COMPLETED',CHARGING:'CHARGING'};
+let text=lbl[p]||p;if(p=='NAV')text='NAVIGATING → '+(S.navAfter=='CHARGING'?'Charging Station':S.navAfter=='ALIGN2'||S.navAfter=='UNLOAD'?STA[m.drop]:STA[m.pick]);if(p=='RETURN')text='RETURNING TO CHARGER';
+const bn=$('banner');bn.textContent=S.estop?'⚠ EMERGENCY STOP (SIMULATED)':S.paused?'PAUSED':text;bn.className='banner '+(S.estop||p=='OBSTACLE'?'bad':p=='REPLAN'||S.paused?'warn':p=='DONE'||p=='CHARGING'?'ok':'');
+$('hMode').textContent=S.estop?'E-STOP':'AUTONOMOUS';$('tId').textContent=m.id;$('tStat').textContent=p=='IDLE'?'IDLE':p=='DONE'?'COMPLETED':'IN PROGRESS';
+const stageOf=()=>{if(['ASSIGNED','SCAN','PLAN_PICK'].includes(p))return 0;if(p=='NAV'&&(S.navAfter=='ALIGN'||S.navAfter=='LOAD'))return 1;if(['OBSTACLE','REPLAN'].includes(p))return(S.navAfter=='ALIGN2'||S.navAfter=='UNLOAD')?3:1;if(['ALIGN','REACH','GRASP','LIFT','RETRACT','LOAD'].includes(p))return 2;if(p=='PLAN_DROP')return 2;if(p=='NAV')return 3;if(['ALIGN2','REACH2','RELEASE','RETRACT2','UNLOAD'].includes(p))return 4;if(p=='DONE')return 5;return -1};
+const si=stageOf();
+const names=[`Map environment (LiDAR)`,`Navigate to ${STA[m.pick]}`,m.arm?'Arm pick: align·reach·grasp·lift':m.pickLbl,`Navigate to ${STA[m.drop]} (avoid obstacles)`,m.arm?'Arm place & release':m.dropLbl,'Task completed'];
+if(S.stepIdx!==si||S.stepModule!==m.id){S.stepIdx=si;S.stepModule=m.id;$('steps').innerHTML=names.map((n,i)=>`<div class="st ${i<si?'dn':i==si?'on':''}"><i>${i<si?'✓':i+1}</i>${n}</div>`).join('')}
+const pr=[[0,1],[1,2],[2,4],[3,5],[4,6],[5,6]][si]||[0,0];const fr=/^NAV/.test(p)||p=='OBSTACLE'||p=='REPLAN'?Math.min(1,S.legDone/S.legLen):p=='DONE'||p=='IDLE'?1:Math.min(1,S.t/(CFG.dur[p]||1));
+if(p!='IDLE')S.prog=Math.max(S.prog,(pr[0]+(pr[1]-pr[0])*fr)/6*100);if(p=='IDLE'&&S.prog<100)S.prog=0;
+$('tProg').textContent=Math.round(S.prog)+'%';$('tBar').style.width=S.prog+'%';
+if(arm){S.arm=S.arm.map((v,i)=>v+(POSE[S.armT][i]-v)*.08);$('armSt').textContent=['ALIGN','REACH','GRASP','LIFT','RETRACT'].includes(p)?p:['ALIGN2','REACH2','RELEASE','RETRACT2'].includes(p)?p:S.box=='held'?'CARRYING':'STOWED';$('armJ').textContent=`S ${Math.round(S.arm[0])}° E ${Math.round(S.arm[1])}°`;$('armG').textContent=S.arm[2]>.6?'OPEN':S.box=='held'?'CLOSED ON ITEM':'CLOSED';}
+else{$('armSt').textContent='N/A';$('armJ').textContent='--';$('armG').textContent='--';}
+$('fr').textContent=S.fr<CFG.range?S.fr.toFixed(2)+' m':'--';
+$('rSt').textContent=S.estop?'EMERGENCY STOP':p=='CHARGING'?'CHARGING':S.paused?'PAUSED':p=='IDLE'?'IDLE':'AUTONOMOUS';
+const bs=p=='CHARGING'?'CHARGING':S.batt<15?'CRITICAL':S.batt<30?'LOW':'NORMAL';$('rBat').textContent=Math.round(S.batt)+'% · '+bs;const bb=$('bBar');bb.style.width=S.batt+'%';bb.style.background=S.batt<15?'var(--rd)':S.batt<30?'var(--am)':'var(--gr)';
+$('rV').textContent=S.v.toFixed(2)+' m/s';$('rPl').textContent=S.payload.toFixed(1)+' / 5.0 kg';$('rPos').textContent=`X ${S.x.toFixed(1)} Y ${S.y.toFixed(1)} θ ${Math.round(S.h)}°`;
+const nav=/^NAV/.test(p)||p=='OBSTACLE'||p=='REPLAN';$('pT').textContent=(nav?S.legLen:0).toFixed(1)+' m';$('pD').textContent=(nav?S.legDone:0).toFixed(1)+' m';$('pR').textContent=(nav?Math.max(0,S.legLen-S.legDone):0).toFixed(1)+' m';
+const cov=Math.min(100,S.nFree/freeTruth*100*1.6);$('cov').textContent=Math.round(cov)+'%';$('nvs').textContent=nav?(p=='OBSTACLE'?'OBSTACLE':p=='REPLAN'?'REPLANNING':'NAVIGATING'):'IDLE';
+$('slam').innerHTML=`<span class="bd g">● LOCALIZED</span> map ${cov>2?'BUILDING':'EMPTY'}`;$('clk').textContent=S.ts+'x';
+if(document.getElementById('page-status').classList.contains('on'))fillStatusPage(m,bs,cov);
+}
+function fillStatusPage(m,bs,cov){$('rs-batt').textContent=Math.round(S.batt)+'% ('+bs+')';$('rs-chg').textContent=S.phase=='CHARGING'?'YES':'NO';$('rs-pl').textContent=S.payload.toFixed(1)+' / 5.0 kg';
+$('rs-mot').textContent=S.v>.02?'DRIVING':'STOPPED';$('rs-v').textContent=S.v.toFixed(2)+' m/s';$('rs-h').textContent=Math.round(S.h)+'°';$('rs-pos').textContent=`X ${S.x.toFixed(1)} Y ${S.y.toFixed(1)}`;
+$('rs-nav').textContent=/^NAV/.test(S.phase)?'ACTIVE':'IDLE';$('rs-loc').textContent='ACTIVE';$('rs-slam').textContent=cov>2?'MAPPING':'IDLE';$('rs-obs').textContent=S.obstacles.length&&S.phase!='IDLE'?'TRIGGERED':'ACTIVE';
+$('rs-mod').textContent=MODS[curModName()]+' '+curModName();$('rs-conn').textContent='LOCKED';$('rs-mode').textContent=S.estop?'E-STOP':'AUTONOMOUS'}
+function loop(now){const dt=Math.min(.1,(now-(loop.l||now))/1000)*S.ts;loop.l=now;S.hit=scan();
+if(!S.paused&&!S.estop&&S.phase!='IDLE')step(dt);else S.v=Math.max(0,S.v-2*dt);
+draw(now);drawArm();ui();requestAnimationFrame(loop)}
+$('bStart').onclick=()=>{if(S.estop)return toast('Reset E-STOP first');if(S.paused){S.paused=false;return}
+if(S.phase=='IDLE'){S.prog=0;S.mission=MISSIONS[curModName()];setPhase('ASSIGNED')}};
+$('bPause').onclick=()=>{S.paused=!S.paused;log(S.paused?'Paused':'Resumed')};
+function fullReset(){const t=S.ts;init();S.ts=t;$('bEr').style.display='none'}$('bReset').onclick=fullReset;
+$('bResetAll').onclick=()=>{fullReset();toast('Simulation data reset')};
+$('bCancel').onclick=()=>{if(S.phase=='IDLE')return;S.phase='IDLE';S.stopping=false;S.path=[];S.obstacles=[];S.payload=0;S.box=null;S.armT='STOW';S.mission=null;S.prog=0;log('Task cancelled')};
+$('bChg').onclick=()=>{if(S.estop)return;S.payload=0;S.box=null;beginNav('C','CHARGING');log('Return to charger requested')};
+$('bEs').onclick=()=>{S.estop=true;S.v=0;$('bEr').style.display='';log('⚠ SIMULATED E-STOP — motion halted (software demo only)')};
+$('bEr').onclick=()=>{S.estop=false;$('bEr').style.display='none';log('E-STOP reset — task resumes')};
+function setSpeed(v){S.ts=v;[...$('spd').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.s==String(v)));$('spdSel').value=v}
+$('spd').onclick=e=>{if(e.target.dataset.s)setSpeed(+e.target.dataset.s)};
+$('spdSel').onchange=e=>setSpeed(+e.target.value);
+document.querySelectorAll('.tl button').forEach(b=>b.onclick=()=>{V[b.dataset.l]^=1;b.classList.toggle('on')});
+$('modSel').onchange=e=>{if(S.phase!='IDLE'){toast('Change module only while idle');e.target.value=$('modSel').dataset.cur||curModName();return}
+const v=e.target.value;$('modSel').dataset.cur=v;log('Module disconnected → '+v+' connected, locked');$('mN').textContent=MODS[v]+' '+v;$('mF').textContent=MISSIONS[v].type;renderModulePage();renderTaskPage()};
+function syncInj(v){OBST_ENABLED=v;$('inj').checked=v;$('inj2').checked=v}
+$('inj').onchange=e=>syncInj(e.target.checked);$('inj2').onchange=e=>syncInj(e.target.checked);
+$('themeToggle').onchange=e=>{document.documentElement.dataset.theme=e.target.checked?'dark':'light';THEME=themeColors();rebuildOff()};
+document.querySelectorAll('.nav [data-p]').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav [data-p]').forEach(x=>x.classList.remove('on'));n.classList.add('on');
+document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('on'));$('page-'+n.dataset.p).classList.add('on');fit()});
+function renderTaskPage(){$('taskCards').innerHTML=Object.entries(MISSIONS).map(([k,m])=>`<div class="card ${k==curModName()?'hi':''}"><h4>${MODS[k]} ${k}</h4><div class="r">Task <b>${m.id} · ${m.type}</b></div><div class="r">Route <b>${STA[m.pick]} → ${STA[m.drop]}</b></div><div class="r">Payload <b>${m.payload} / 5.0 kg</b></div><button class="c" onclick="pickModule('${k}')">${k==curModName()?'Current task':'Set as current task'}</button></div>`).join('');
+$('taskHist').innerHTML=[['T-099','Cargo · Storage B→CNC','COMPLETED'],['T-098','Arm · Storage A→CNC','COMPLETED'],['T-097','Lift · Storage B→Assembly','COMPLETED'],['T-096','Inspection · Assembly→Inspection','COMPLETED']].map(t=>`<div class="card"><h4>${t[0]}</h4><div class="mini">${t[1]}</div><span class="bd g">${t[2]}</span></div>`).join('')}
+function renderModulePage(){$('modCards').innerHTML=Object.entries(MISSIONS).map(([k,m])=>`<div class="card ${k==curModName()?'hi':''}"><h4>${MODS[k]} ${k}</h4><div class="r">Function <b>${m.type}</b></div><div class="r">Payload capacity <b>5.0 kg</b></div><div class="r">Status <span class="bd ${k==curModName()?'g':'b'}">${k==curModName()?'CONNECTED':'AVAILABLE'}</span></div><button class="c" onclick="pickModule('${k}')">${k==curModName()?'Attached':'Attach module'}</button></div>`).join('')}
+window.pickModule=k=>{if(S.phase!='IDLE')return toast('Change module only while idle');$('modSel').value=k;$('modSel').dispatchEvent(new Event('change'));renderTaskPage();document.querySelector('.nav [data-p="nav"]').click()};
+function renderAnalytics(){const d={'Cargo':14,'Lift':9,'Conveyor':11,'Inspection':7,'Arm':6},mx=Math.max(...Object.values(d));
+$('anBars').innerHTML=Object.entries(d).map(([k,v])=>`<div class="r" style="align-items:center"><span style="width:80px">${k}</span><div class="bar" style="flex:1"><div style="width:${v/mx*100}%;background:var(--bl)"></div></div><b style="width:24px;text-align:right">${v}</b></div>`).join('')}
+init();$('modSel').value='Cargo Module';$('modSel').dataset.cur='Cargo Module';document.documentElement.dataset.theme='light';THEME=themeColors();rebuildOff();fit();renderTaskPage();renderModulePage();renderAnalytics();requestAnimationFrame(loop);
+</script></body></html>
